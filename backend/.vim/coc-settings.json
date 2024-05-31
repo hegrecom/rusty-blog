@@ -1,0 +1,6 @@
+{
+  "sql.database": "postgresql",
+  "sql.formatOptions": {
+    "language": "postgresql"
+  }
+}
