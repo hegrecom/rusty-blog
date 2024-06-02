@@ -7,3 +7,4 @@ edition = "2021"
 axum = { version = "0.7.5", features = ["http2"] }
 tokio = { version = "1.37.0", features = ["full"] }
 diesel = { version = "2.2.0", features = ["postgres"] }
+serde = { version = "1.0.203", features = ["derive"] }
