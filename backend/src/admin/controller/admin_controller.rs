@@ -4,11 +4,9 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
 
-use crate::{
-    admin::{dto::login_request::LoginRequest, entity::admin::Admin},
-    schema::admins,
+use crate::admin::{
+    dto::login_request::LoginRequest, repository::admin_repository::AdminRepository,
 };
 
 pub async fn login(
@@ -18,11 +16,9 @@ pub async fn login(
     match login_request {
         Ok(login_request) => {
             let password = login_request.password();
-            let conn = pool.get().await.unwrap();
-            let admin = conn
-                .interact(|conn| admins::dsl::admins.select(Admin::as_select()).first(conn))
+            let admin = AdminRepository::new(pool.clone())
+                .fetch_admin()
                 .await
-                .unwrap()
                 .unwrap();
             match admin.authenticate(password) {
                 Ok(true) => {
