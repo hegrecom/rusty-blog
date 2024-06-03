@@ -1,3 +1,4 @@
+use anyhow::Result;
 use diesel::{deserialize::Queryable, Selectable};
 
 #[derive(Queryable, Selectable)]
@@ -8,7 +9,9 @@ pub struct Admin {
 }
 
 impl Admin {
-    pub fn encrypted_password(&self) -> &str {
-        &self.password
+    pub fn authenticate(&self, password: &str) -> Result<bool> {
+        let result = bcrypt::verify(password, &self.password)?;
+
+        Ok(result)
     }
 }

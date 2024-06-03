@@ -7,7 +7,7 @@ use axum::{
 use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
 
 use crate::{
-    admin::dto::{admin::Admin, login_request::LoginRequest},
+    admin::{dto::login_request::LoginRequest, entity::admin::Admin},
     schema::admins,
 };
 
@@ -24,7 +24,7 @@ pub async fn login(
                 .await
                 .unwrap()
                 .unwrap();
-            match bcrypt::verify(password, admin.encrypted_password()) {
+            match admin.authenticate(password) {
                 Ok(true) => {
                     return (StatusCode::OK, format!("Hello, {}!", password)).into_response()
                 }
