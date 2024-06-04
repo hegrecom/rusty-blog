@@ -11,4 +11,6 @@ serde = { version = "1.0.203", features = ["derive"] }
 bcrypt = { version = "0.15.1" }
 deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
 dotenv = { version = "0.15.0" }
-anyhow = { versio = "1.0.86" }
+anyhow = { version = "1.0.86" }
+thiserror = { version = "1.0.61" }
+serde_json = { version = "1.0.117" }

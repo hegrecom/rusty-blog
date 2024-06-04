@@ -4,6 +4,7 @@ use admin::controller::admin_controller;
 use axum::{routing::post, Router};
 
 mod admin;
+mod core;
 mod schema;
 
 #[tokio::main]
