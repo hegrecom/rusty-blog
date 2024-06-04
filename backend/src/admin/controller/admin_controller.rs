@@ -1,19 +1,20 @@
 use axum::{
     extract::{rejection::JsonRejection, State},
-    http::StatusCode,
-    response::{IntoResponse, Response},
     Json,
 };
 
 use crate::{
     admin::{dto::login_request::LoginRequest, repository::admin_repository::AdminRepository},
-    core::error::Error,
+    core::{
+        error::Error,
+        success_response::{SuccessResponse, SuccessResponseBuilder},
+    },
 };
 
 pub async fn login(
     State(pool): State<deadpool_diesel::postgres::Pool>,
     login_request: Result<Json<LoginRequest>, JsonRejection>,
-) -> Result<Response, Error> {
+) -> Result<SuccessResponse, Error> {
     match login_request {
         Ok(login_request) => {
             let password = login_request.password();
@@ -22,11 +23,9 @@ pub async fn login(
                 .await
                 .unwrap();
             match admin.authenticate(password) {
-                Ok(true) => {
-                    return Ok((StatusCode::OK, format!("Hello, {}!", password)).into_response())
-                }
+                Ok(true) => Ok(SuccessResponseBuilder::new().build()),
                 Ok(false) => Err(Error::Unauthorized),
-                Err(err) => Err(Error::InternalServerError(format!("{:?}", err))),
+                Err(err) => Err(Error::InternalServerError(format!("{}", err.to_string()))),
             }
         }
         Err(err) => Err(Error::BadRequest(err.body_text())),
