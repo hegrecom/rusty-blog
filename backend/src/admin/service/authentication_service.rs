@@ -6,6 +6,8 @@ use crate::{
     core::error::Error,
 };
 
+use super::{jwt_token_service::JwtTokenService, token_service::TokenService};
+
 pub struct AuthenticationService {
     pool: deadpool_diesel::postgres::Pool,
 }
@@ -21,7 +23,10 @@ impl AuthenticationService {
             .await
             .map_err(|err| Error::InternalServerError(format!("{}", err.to_string())))?;
         match admin.authenticate(password) {
-            Ok(true) => Ok(Token::new("Hi".to_string())),
+            Ok(true) => {
+                let token = JwtTokenService::new().generate_token()?;
+                Ok(token)
+            }
             Ok(false) => Err(Error::Unauthorized),
             Err(err) => Err(Error::InternalServerError(format!("{}", err.to_string()))),
         }
