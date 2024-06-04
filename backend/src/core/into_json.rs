@@ -1,12 +1,10 @@
-pub trait IntoJson {
-    fn into_json(self) -> serde_json::Value;
-}
+use serde::Serialize;
 
-impl<T> IntoJson for T
-where
-    T: serde::Serialize,
-{
-    fn into_json(self) -> serde_json::Value {
+pub trait IntoJson: Serialize {
+    fn into_json(&self) -> serde_json::Value
+    where
+        Self: Serialize,
+    {
         serde_json::to_value(self).unwrap()
     }
 }

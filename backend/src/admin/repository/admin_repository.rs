@@ -17,8 +17,8 @@ impl AdminRepository {
         let result = conn
             .interact(|conn| admins::table.select(Admin::as_select()).first(conn))
             .await
-            .map_err(|err| anyhow::anyhow!("{:?}", err))?
-            .map_err(|err| anyhow::anyhow!("{:?}", err))?;
+            .map_err(|err| anyhow::anyhow!("{}", err.to_string()))?
+            .map_err(|err| anyhow::anyhow!("{}", err.to_string()))?;
 
         Ok(result)
     }
