@@ -1,7 +1,7 @@
 use crate::{
     core::error::Error,
     post::{
-        dto::{post::Post, post_creation::PostCreation},
+        dto::{post::Post, post_request::PostRequest},
         repository::post_repository::PostRepository,
     },
 };
@@ -15,9 +15,9 @@ impl PostCreationService {
         Self { pool }
     }
 
-    pub async fn create(&self, post_creation: PostCreation) -> Result<Post, Error> {
+    pub async fn create(&self, post_request: PostRequest) -> Result<Post, Error> {
         let post_respository = PostRepository::new(self.pool.clone());
-        let post = post_respository.create(post_creation).await?;
+        let post = post_respository.create(post_request).await?;
         Ok(post)
     }
 }

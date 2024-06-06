@@ -13,6 +13,8 @@ pub enum Error {
     BadRequest(String),
     #[error("No route for {0}")]
     NotFound(String),
+    #[error("Record not found")]
+    RecordNotFound,
     #[error("Internal Server Error: {0}")]
     InternalServerError(String),
 }
@@ -27,6 +29,9 @@ impl IntoResponse for Error {
                 (StatusCode::BAD_REQUEST, ErrorResponse::from(self)).into_response()
             }
             Error::NotFound(_) => {
+                (StatusCode::NOT_FOUND, ErrorResponse::from(self)).into_response()
+            }
+            Error::RecordNotFound => {
                 (StatusCode::NOT_FOUND, ErrorResponse::from(self)).into_response()
             }
             Error::InternalServerError(_) => {

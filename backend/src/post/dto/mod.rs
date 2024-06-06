@@ -1,2 +1,2 @@
 pub mod post;
-pub mod post_creation;
+pub mod post_request;
