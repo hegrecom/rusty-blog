@@ -10,6 +10,7 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
+use post::controller::admin::post_controller as admin_post_controller;
 use post::controller::post_controller;
 
 mod admin;
@@ -28,14 +29,14 @@ async fn main() {
         .expect("Could not create database pool");
 
     let admin_routes = Router::new()
-        .route("/posts", post(post_controller::create))
+        .route("/admins/posts", post(admin_post_controller::create))
         .route(
-            "/posts/:post_id",
-            put(post_controller::update).delete(post_controller::delete),
+            "/admins/posts/:post_id",
+            put(admin_post_controller::update).delete(admin_post_controller::delete),
         )
         .route_layer(from_extractor::<RequireAuthorization>());
     let public_routes = Router::new()
-        .route("/login", post(admin_controller::login))
+        .route("/admins/login", post(admin_controller::login))
         .route("/posts", get(post_controller::index))
         .route("/posts/:post_id", get(post_controller::show));
 
