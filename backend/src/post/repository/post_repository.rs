@@ -40,7 +40,10 @@ impl PostRepository {
         let result = conn
             .interact(move |conn| {
                 diesel::update(schema::posts::table.find(id))
-                    .set(post_request)
+                    .set((
+                        post_request,
+                        schema::posts::updated_at.eq(chrono::Utc::now().naive_utc()),
+                    ))
                     .get_result(conn)
             })
             .await
@@ -60,7 +63,10 @@ impl PostRepository {
         let result = conn
             .interact(move |conn| {
                 diesel::update(schema::posts::table.find(id))
-                    .set(schema::posts::status.eq(post::Status::Published))
+                    .set((
+                        schema::posts::status.eq(post::Status::Published),
+                        schema::posts::updated_at.eq(chrono::Utc::now().naive_utc()),
+                    ))
                     .get_result(conn)
             })
             .await
