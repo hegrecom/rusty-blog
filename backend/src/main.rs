@@ -26,7 +26,10 @@ async fn main() {
 
     let app = Router::new()
         .route("/login", post(admin_controller::login))
-        .route("/posts", post(post_controller::create))
+        .route(
+            "/posts",
+            post(post_controller::create).get(post_controller::index),
+        )
         .route(
             "/posts/:post_id",
             put(post_controller::update)
