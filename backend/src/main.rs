@@ -1,8 +1,9 @@
-use core::error::not_found_handler;
+use core::error::{method_not_allowed_handler, not_found_handler};
 use std::env;
 
 use admin::controller::admin_controller;
 use axum::{
+    middleware,
     routing::{post, put},
     Router,
 };
@@ -28,6 +29,7 @@ async fn main() {
         .route("/posts", post(post_controller::create))
         .route("/posts/:post_id", put(post_controller::update))
         .with_state(pool)
+        .layer(middleware::from_fn(method_not_allowed_handler))
         .fallback(not_found_handler);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

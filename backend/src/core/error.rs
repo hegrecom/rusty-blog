@@ -1,5 +1,7 @@
 use axum::{
+    extract::Request,
     http::{StatusCode, Uri},
+    middleware::Next,
     response::{IntoResponse, Response},
 };
 
@@ -15,6 +17,8 @@ pub enum Error {
     NotFound(String),
     #[error("Record not found")]
     RecordNotFound,
+    #[error("Method Not Allowed")]
+    MethodNotAllowed,
     #[error("Internal Server Error: {0}")]
     InternalServerError(String),
 }
@@ -34,6 +38,9 @@ impl IntoResponse for Error {
             Error::RecordNotFound => {
                 (StatusCode::NOT_FOUND, ErrorResponse::from(self)).into_response()
             }
+            Error::MethodNotAllowed => {
+                (StatusCode::METHOD_NOT_ALLOWED, ErrorResponse::from(self)).into_response()
+            }
             Error::InternalServerError(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, ErrorResponse::from(self)).into_response()
             }
@@ -43,4 +50,13 @@ impl IntoResponse for Error {
 
 pub async fn not_found_handler(uri: Uri) -> Result<(), Error> {
     Err(Error::NotFound(uri.to_string()))
+}
+
+pub async fn method_not_allowed_handler(req: Request, next: Next) -> Result<Response, Error> {
+    let response = next.run(req).await;
+
+    match response.status() {
+        StatusCode::METHOD_NOT_ALLOWED => Err(Error::MethodNotAllowed),
+        _ => Ok(response),
+    }
 }
