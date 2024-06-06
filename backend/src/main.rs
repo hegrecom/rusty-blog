@@ -27,7 +27,10 @@ async fn main() {
     let app = Router::new()
         .route("/login", post(admin_controller::login))
         .route("/posts", post(post_controller::create))
-        .route("/posts/:post_id", put(post_controller::update))
+        .route(
+            "/posts/:post_id",
+            put(post_controller::update).get(post_controller::show),
+        )
         .with_state(pool)
         .layer(middleware::from_fn(method_not_allowed_handler))
         .fallback(not_found_handler);
