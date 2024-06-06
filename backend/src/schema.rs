@@ -10,8 +10,8 @@ diesel::table! {
     admins (id) {
         id -> Int4,
         password -> Varchar,
-        created_at -> Nullable<Timestamp>,
-        updated_at -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -25,8 +25,8 @@ diesel::table! {
         title -> Varchar,
         content -> Text,
         status -> Status,
-        created_at -> Nullable<Timestamp>,
-        updated_at -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
