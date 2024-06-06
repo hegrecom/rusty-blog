@@ -23,7 +23,9 @@ pub async fn create(
 ) -> Result<SuccessResponse, Error> {
     match post_request {
         Ok(Json(post_request)) => {
-            let post = PostCreationService::new(pool).create(post_request).await?;
+            let post = PostCreationService::new(post_repository(pool.clone()))
+                .create(post_request)
+                .await?;
             Ok(SuccessResponseBuilder::new().data(post).build())
         }
         Err(err) => Err(Error::BadRequest(err.to_string())),
@@ -37,12 +39,16 @@ pub async fn update(
 ) -> Result<SuccessResponse, Error> {
     match post_request {
         Ok(Json(post_request)) => {
-            let post_repository = PostRepository::new(pool.clone());
-            let post_update_service = PostUpdateService::new(post_repository);
-            let post = post_update_service.update(post_id, post_request).await?;
+            let post = PostUpdateService::new(post_repository(pool.clone()))
+                .update(post_id, post_request)
+                .await?;
 
             Ok(SuccessResponseBuilder::new().data(post).build())
         }
         Err(err) => Err(Error::BadRequest(err.to_string())),
     }
+}
+
+fn post_repository(pool: deadpool_diesel::postgres::Pool) -> PostRepository {
+    PostRepository::new(pool.clone())
 }

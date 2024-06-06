@@ -5,7 +5,8 @@ use axum::{
 
 use crate::{
     admin::{
-        dto::login_request::LoginRequest, service::authentication_service::AuthenticationService,
+        dto::login_request::LoginRequest, repository::admin_repository::AdminRepository,
+        service::authentication_service::AuthenticationService,
     },
     core::{
         error::Error,
@@ -19,11 +20,15 @@ pub async fn login(
 ) -> Result<SuccessResponse, Error> {
     match login_request {
         Ok(Json(login_request)) => {
-            let authentication_service = AuthenticationService::new(pool.clone());
+            let authentication_service = AuthenticationService::new(admin_repository(pool));
             let token = authentication_service.authenticate(login_request).await?;
 
             Ok(SuccessResponseBuilder::new().data(token).build())
         }
         Err(err) => Err(Error::BadRequest(err.body_text())),
     }
+}
+
+fn admin_repository(pool: deadpool_diesel::postgres::Pool) -> AdminRepository {
+    AdminRepository::new(pool.clone())
 }

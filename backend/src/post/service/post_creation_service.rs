@@ -7,17 +7,16 @@ use crate::{
 };
 
 pub struct PostCreationService {
-    pool: deadpool_diesel::postgres::Pool,
+    post_repository: PostRepository,
 }
 
 impl PostCreationService {
-    pub fn new(pool: deadpool_diesel::postgres::Pool) -> Self {
-        Self { pool }
+    pub fn new(post_repository: PostRepository) -> Self {
+        Self { post_repository }
     }
 
     pub async fn create(&self, post_request: PostRequest) -> Result<Post, Error> {
-        let post_respository = PostRepository::new(self.pool.clone());
-        let post = post_respository.create(post_request).await?;
+        let post = self.post_repository.create(post_request).await?;
         Ok(post)
     }
 }
