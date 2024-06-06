@@ -34,6 +34,10 @@ async fn main() {
             "/admins/posts/:post_id",
             put(admin_post_controller::update).delete(admin_post_controller::delete),
         )
+        .route(
+            "/admins/posts/:post_id/publish",
+            post(admin_post_controller::publish),
+        )
         .route_layer(from_extractor::<RequireAuthorization>());
     let public_routes = Router::new()
         .route("/admins/login", post(admin_controller::login))

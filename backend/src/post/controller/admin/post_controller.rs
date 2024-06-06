@@ -13,7 +13,7 @@ use crate::{
         repository::post_repository::PostRepository,
         service::{
             post_creation_service::PostCreationService, post_delete_service::PostDeleteService,
-            post_update_service::PostUpdateService,
+            post_publish_service::PostPublishService, post_update_service::PostUpdateService,
         },
     },
 };
@@ -48,6 +48,16 @@ pub async fn update(
         }
         Err(err) => Err(Error::BadRequest(err.to_string())),
     }
+}
+
+pub async fn publish(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    Path(post_id): Path<i32>,
+) -> Result<SuccessResponse, Error> {
+    let post = PostPublishService::new(post_repository(pool.clone()))
+        .publish(post_id)
+        .await?;
+    Ok(SuccessResponseBuilder::new().data(post).build())
 }
 
 pub async fn delete(

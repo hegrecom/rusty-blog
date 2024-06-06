@@ -55,6 +55,26 @@ impl PostRepository {
         }
     }
 
+    pub async fn publish_post(&self, id: i32) -> Result<Post, Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| {
+                diesel::update(schema::posts::table.find(id))
+                    .set(schema::posts::status.eq(post::Status::Published))
+                    .get_result(conn)
+            })
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        match result {
+            Ok(post) => Ok(post),
+            Err(err) => match err {
+                diesel::result::Error::NotFound => Err(Error::RecordNotFound),
+                _ => Err(Error::InternalServerError(err.to_string())),
+            },
+        }
+    }
+
     pub async fn fetch(&self, offset: i64, limit: i64) -> Result<Vec<Post>, Error> {
         let conn = self.get_db_connection().await?;
         let result = conn
