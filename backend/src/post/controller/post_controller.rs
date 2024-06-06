@@ -8,7 +8,7 @@ use crate::{
         error::Error,
         success_response::{SuccessResponse, SuccessResponseBuilder},
     },
-    post::{dto::post_creation::PostCreation, repository::post_repository::PostRepository},
+    post::{dto::post_creation::PostCreation, service::post_creation_service::PostCreationService},
 };
 
 pub async fn create(
@@ -17,8 +17,7 @@ pub async fn create(
 ) -> Result<SuccessResponse, Error> {
     match post_creation {
         Ok(Json(post_creation)) => {
-            let post_respository = PostRepository::new(pool.clone());
-            let post = post_respository.create(post_creation).await?;
+            let post = PostCreationService::new(pool).create(post_creation).await?;
             Ok(SuccessResponseBuilder::new().data(post).build())
         }
         Err(err) => Err(Error::BadRequest(err.to_string())),
