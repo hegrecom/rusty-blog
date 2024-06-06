@@ -26,7 +26,7 @@ pub struct Post {
     updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, Serialize, AsExpression, FromSqlRow)]
+#[derive(Debug, Clone, Copy, Serialize, AsExpression, FromSqlRow)]
 #[sql_type = "schema::sql_types::Status"]
 pub enum Status {
     #[serde(rename = "draft")]

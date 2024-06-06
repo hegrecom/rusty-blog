@@ -1,6 +1,9 @@
 use crate::{
-    core::error::Error,
-    post::{dto::post::Post, repository::post_repository::PostRepository},
+    core::{error::Error, page_response::PageResponse, pageable::Pageable},
+    post::{
+        dto::post::{Post, Status},
+        repository::post_repository::PostRepository,
+    },
 };
 
 pub struct PostFetchService {
@@ -15,5 +18,32 @@ impl PostFetchService {
     pub async fn fetch(&self, id: i32) -> Result<Post, Error> {
         let post = self.post_repository.find(id).await?;
         Ok(post)
+    }
+
+    pub async fn fetch_list(
+        &self,
+        pageable: Pageable,
+        status: Option<Status>,
+    ) -> Result<PageResponse<Post>, Error> {
+        let (posts, count) = match status {
+            Some(status) => {
+                let posts = self
+                    .post_repository
+                    .fetch_by_status(status, pageable.offset(), pageable.limit())
+                    .await?;
+                let count = self.post_repository.total_count_by_status(status).await?;
+                (posts, count)
+            }
+            None => {
+                let posts = self
+                    .post_repository
+                    .fetch(pageable.offset(), pageable.limit())
+                    .await?;
+                let count = self.post_repository.total_count().await?;
+                (posts, count)
+            }
+        };
+
+        Ok(PageResponse::new(posts, count, pageable))
     }
 }

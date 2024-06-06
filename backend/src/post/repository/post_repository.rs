@@ -80,8 +80,8 @@ impl PostRepository {
     pub async fn fetch_by_status(
         &self,
         status: post::Status,
-        limit: i64,
         offset: i64,
+        limit: i64,
     ) -> Result<Vec<Post>, Error> {
         let conn = self.get_db_connection().await?;
         let result = conn
