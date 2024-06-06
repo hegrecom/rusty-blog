@@ -2,7 +2,10 @@ use core::error::not_found_handler;
 use std::env;
 
 use admin::controller::admin_controller;
-use axum::{routing::post, Router};
+use axum::{
+    routing::{post, put},
+    Router,
+};
 use post::controller::post_controller;
 
 mod admin;
@@ -23,6 +26,7 @@ async fn main() {
     let app = Router::new()
         .route("/login", post(admin_controller::login))
         .route("/posts", post(post_controller::create))
+        .route("/posts/:post_id", put(post_controller::update))
         .with_state(pool)
         .fallback(not_found_handler);
 
