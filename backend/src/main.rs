@@ -6,6 +6,7 @@ use axum::{routing::post, Router};
 
 mod admin;
 mod core;
+mod post;
 mod schema;
 
 #[tokio::main]
