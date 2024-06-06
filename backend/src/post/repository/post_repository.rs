@@ -68,6 +68,20 @@ impl PostRepository {
         }
     }
 
+    pub async fn delete(&self, id: i32) -> Result<(), Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| diesel::delete(schema::posts::table.find(id)).execute(conn))
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        match result {
+            Ok(1) => Ok(()),
+            Ok(_) => Err(Error::RecordNotFound),
+            Err(err) => Err(Error::InternalServerError(err.to_string())),
+        }
+    }
+
     async fn get_db_connection(&self) -> Result<Object, Error> {
         let conn = self
             .pool

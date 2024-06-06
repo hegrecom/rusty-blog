@@ -12,8 +12,8 @@ use crate::{
         dto::post_request::PostRequest,
         repository::post_repository::PostRepository,
         service::{
-            post_creation_service::PostCreationService, post_fetch_service::PostFetchService,
-            post_update_service::PostUpdateService,
+            post_creation_service::PostCreationService, post_delete_service::PostDeleteService,
+            post_fetch_service::PostFetchService, post_update_service::PostUpdateService,
         },
     },
 };
@@ -58,6 +58,16 @@ pub async fn show(
         .fetch(post_id)
         .await?;
     Ok(SuccessResponseBuilder::new().data(post).build())
+}
+
+pub async fn delete(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    Path(post_id): Path<i32>,
+) -> Result<SuccessResponse, Error> {
+    PostDeleteService::new(post_repository(pool.clone()))
+        .delete(post_id)
+        .await?;
+    Ok(SuccessResponseBuilder::new().build())
 }
 
 fn post_repository(pool: deadpool_diesel::postgres::Pool) -> PostRepository {

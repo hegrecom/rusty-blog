@@ -29,7 +29,9 @@ async fn main() {
         .route("/posts", post(post_controller::create))
         .route(
             "/posts/:post_id",
-            put(post_controller::update).get(post_controller::show),
+            put(post_controller::update)
+                .get(post_controller::show)
+                .delete(post_controller::delete),
         )
         .with_state(pool)
         .layer(middleware::from_fn(method_not_allowed_handler))
