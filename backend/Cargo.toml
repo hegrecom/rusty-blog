@@ -15,3 +15,4 @@ thiserror = { version = "1.0.61" }
 serde_json = { version = "1.0.117" }
 chrono = { version = "0.4.38", features = ["serde"] }
 jsonwebtoken = { version = "9.3.0" }
+regex = { version = "1.10.4" }

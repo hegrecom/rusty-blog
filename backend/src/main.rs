@@ -1,10 +1,13 @@
-use core::error::{method_not_allowed_handler, not_found_handler};
+use core::{
+    authorization::RequireAuthorization,
+    error::{method_not_allowed_handler, not_found_handler},
+};
 use std::env;
 
 use admin::controller::admin_controller;
 use axum::{
-    middleware,
-    routing::{post, put},
+    middleware::{self, from_extractor},
+    routing::{get, post, put},
     Router,
 };
 use post::controller::post_controller;
@@ -24,18 +27,20 @@ async fn main() {
         .build()
         .expect("Could not create database pool");
 
-    let app = Router::new()
-        .route("/login", post(admin_controller::login))
-        .route(
-            "/posts",
-            post(post_controller::create).get(post_controller::index),
-        )
+    let admin_routes = Router::new()
+        .route("/posts", post(post_controller::create))
         .route(
             "/posts/:post_id",
-            put(post_controller::update)
-                .get(post_controller::show)
-                .delete(post_controller::delete),
+            put(post_controller::update).delete(post_controller::delete),
         )
+        .route_layer(from_extractor::<RequireAuthorization>());
+    let public_routes = Router::new()
+        .route("/login", post(admin_controller::login))
+        .route("/posts", get(post_controller::index))
+        .route("/posts/:post_id", get(post_controller::show));
+
+    let app = admin_routes
+        .merge(public_routes)
         .with_state(pool)
         .layer(middleware::from_fn(method_not_allowed_handler))
         .fallback(not_found_handler);

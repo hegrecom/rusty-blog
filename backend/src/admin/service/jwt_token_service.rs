@@ -1,6 +1,6 @@
 use std::env;
 
-use jsonwebtoken::{EncodingKey, Header};
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 
 use crate::{
     admin::{dto::token::Token, vo::claims::Claims},
@@ -36,5 +36,16 @@ impl TokenService for JwtTokenService {
         .map_err(|err| Error::InternalServerError(err.to_string()))?;
 
         Ok(Token::new(token_string))
+    }
+
+    fn verify_token(&self, token: Token) -> Result<bool, Error> {
+        jsonwebtoken::decode::<Claims>(
+            token.value(),
+            &DecodingKey::from_secret(self.secret.as_ref()),
+            &Validation::default(),
+        )
+        .map_err(|_err| Error::Unauthorized)?;
+
+        Ok(true)
     }
 }

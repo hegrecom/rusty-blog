@@ -1,3 +1,4 @@
+pub mod authorization;
 pub mod error;
 pub mod error_response;
 pub mod into_json;

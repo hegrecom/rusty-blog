@@ -11,6 +11,10 @@ impl Token {
     pub fn new(token: String) -> Self {
         Token { token }
     }
+
+    pub fn value(&self) -> &str {
+        &self.token
+    }
 }
 
 impl IntoJson for Token {}
