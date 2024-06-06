@@ -20,15 +20,14 @@ impl AuthenticationService {
         let password = login_request.password();
         let admin = AdminRepository::new(self.pool.clone())
             .fetch_admin()
-            .await
-            .map_err(|err| Error::InternalServerError(format!("{}", err.to_string())))?;
+            .await?;
         match admin.authenticate(password) {
             Ok(true) => {
                 let token = JwtTokenService::new().generate_token()?;
                 Ok(token)
             }
             Ok(false) => Err(Error::Unauthorized),
-            Err(err) => Err(Error::InternalServerError(format!("{}", err.to_string()))),
+            Err(err) => Err(Error::InternalServerError(err.to_string())),
         }
     }
 }

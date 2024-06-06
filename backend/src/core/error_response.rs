@@ -17,7 +17,7 @@ impl IntoResponse for ErrorResponse {
         Json(serde_json::json!({
             "data": null,
             "meta": {
-                "message": format!("{}", self.error.to_string()),
+                "message": self.error.to_string(),
             }
         }))
         .into_response()
