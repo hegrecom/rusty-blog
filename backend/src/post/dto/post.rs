@@ -1,7 +1,10 @@
+use std::io::Write;
+
 use chrono::NaiveDateTime;
 use diesel::{
     deserialize::{FromSql, FromSqlRow, Queryable},
     expression::AsExpression,
+    serialize::{IsNull, Output, Result, ToSql},
     Selectable,
 };
 use serde::Serialize;
@@ -41,6 +44,16 @@ impl FromSql<schema::sql_types::Status, diesel::pg::Pg> for Status {
             b"published" => Ok(Status::Published),
             _ => Err("Unrecognized enum variant".into()),
         }
+    }
+}
+
+impl ToSql<schema::sql_types::Status, diesel::pg::Pg> for Status {
+    fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, diesel::pg::Pg>) -> Result {
+        match self {
+            Status::Draft => out.write_all(b"draft")?,
+            Status::Published => out.write_all(b"published")?,
+        }
+        Ok(IsNull::No)
     }
 }
 

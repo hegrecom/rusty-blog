@@ -1,9 +1,12 @@
 use deadpool_diesel::postgres::Object;
-use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
 
 use crate::{
     core::error::Error,
-    post::dto::{post::Post, post_request::PostRequest},
+    post::dto::{
+        post::{self, Post},
+        post_request::PostRequest,
+    },
     schema,
 };
 
@@ -52,6 +55,64 @@ impl PostRepository {
         }
     }
 
+    pub async fn fetch(&self, offset: i64, limit: i64) -> Result<Vec<Post>, Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| Self::pagable_select_query(offset, limit).load::<Post>(conn))
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        Ok(result)
+    }
+
+    pub async fn total_count(&self) -> Result<i64, Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| schema::posts::table.count().get_result(conn))
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        Ok(result)
+    }
+
+    pub async fn fetch_by_status(
+        &self,
+        status: post::Status,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<Post>, Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| {
+                Self::pagable_select_query(offset, limit)
+                    .filter(schema::posts::status.eq(status))
+                    .load::<Post>(conn)
+            })
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        Ok(result)
+    }
+
+    pub async fn total_count_by_status(&self, status: post::Status) -> Result<i64, Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| {
+                schema::posts::table
+                    .filter(schema::posts::status.eq(status))
+                    .count()
+                    .get_result(conn)
+            })
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        Ok(result)
+    }
+
     pub async fn find(&self, id: i32) -> Result<Post, Error> {
         let conn = self.get_db_connection().await?;
         let result = conn
@@ -90,5 +151,16 @@ impl PostRepository {
             .map_err(|err| Error::InternalServerError(err.to_string()))?;
 
         Ok(conn)
+    }
+
+    fn pagable_select_query(
+        offset: i64,
+        limit: i64,
+    ) -> schema::posts::BoxedQuery<'static, diesel::pg::Pg> {
+        schema::posts::table
+            .order(schema::posts::id.desc())
+            .offset(offset)
+            .limit(limit)
+            .into_boxed()
     }
 }
