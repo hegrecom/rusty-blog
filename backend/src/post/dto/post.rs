@@ -6,7 +6,10 @@ use diesel::{
 };
 use serde::Serialize;
 
-use crate::schema::{self, posts};
+use crate::{
+    core::into_json::IntoJson,
+    schema::{self, posts},
+};
 
 #[derive(Debug, Serialize, Queryable, Selectable)]
 #[diesel(table_name = posts)]
@@ -40,3 +43,5 @@ impl FromSql<schema::sql_types::Status, diesel::pg::Pg> for Status {
         }
     }
 }
+
+impl IntoJson for Post {}

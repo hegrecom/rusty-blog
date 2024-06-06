@@ -3,6 +3,7 @@ use std::env;
 
 use admin::controller::admin_controller;
 use axum::{routing::post, Router};
+use post::controller::post_controller;
 
 mod admin;
 mod core;
@@ -21,6 +22,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/login", post(admin_controller::login))
+        .route("/posts", post(post_controller::create))
         .with_state(pool)
         .fallback(not_found_handler);
 
