@@ -1,3 +1,4 @@
+use core::error::not_found_handler;
 use std::env;
 
 use admin::controller::admin_controller;
@@ -19,7 +20,8 @@ async fn main() {
 
     let app = Router::new()
         .route("/login", post(admin_controller::login))
-        .with_state(pool);
+        .with_state(pool)
+        .fallback(not_found_handler);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();

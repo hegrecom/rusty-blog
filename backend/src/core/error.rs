@@ -1,5 +1,5 @@
 use axum::{
-    http::StatusCode,
+    http::{StatusCode, Uri},
     response::{IntoResponse, Response},
 };
 
@@ -11,6 +11,8 @@ pub enum Error {
     Unauthorized,
     #[error("Bad Request: {0}")]
     BadRequest(String),
+    #[error("No route for {0}")]
+    NotFound(String),
     #[error("Internal Server Error: {0}")]
     InternalServerError(String),
 }
@@ -24,9 +26,16 @@ impl IntoResponse for Error {
             Error::BadRequest(_) => {
                 (StatusCode::BAD_REQUEST, ErrorResponse::from(self)).into_response()
             }
+            Error::NotFound(_) => {
+                (StatusCode::NOT_FOUND, ErrorResponse::from(self)).into_response()
+            }
             Error::InternalServerError(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, ErrorResponse::from(self)).into_response()
             }
         }
     }
+}
+
+pub async fn not_found_handler(uri: Uri) -> Result<(), Error> {
+    Err(Error::NotFound(uri.to_string()))
 }
