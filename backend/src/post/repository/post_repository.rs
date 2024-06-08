@@ -155,6 +155,27 @@ impl PostRepository {
         }
     }
 
+    pub async fn find_by_status(&self, id: i32, status: post::Status) -> Result<Post, Error> {
+        let conn = self.get_db_connection().await?;
+        let result = conn
+            .interact(move |conn| {
+                schema::posts::table
+                    .filter(schema::posts::status.eq(status))
+                    .find(id)
+                    .get_result(conn)
+            })
+            .await
+            .map_err(|err| Error::InternalServerError(err.to_string()))?;
+
+        match result {
+            Ok(post) => Ok(post),
+            Err(err) => match err {
+                diesel::result::Error::NotFound => Err(Error::RecordNotFound),
+                _ => Err(Error::InternalServerError(err.to_string())),
+            },
+        }
+    }
+
     pub async fn delete(&self, id: i32) -> Result<(), Error> {
         let conn = self.get_db_connection().await?;
         let result = conn

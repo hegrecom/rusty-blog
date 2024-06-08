@@ -10,7 +10,8 @@ use crate::{
         success_response::{SuccessResponse, SuccessResponseBuilder},
     },
     post::{
-        repository::post_repository::PostRepository, service::post_fetch_service::PostFetchService,
+        dto::post, repository::post_repository::PostRepository,
+        service::post_fetch_service::PostFetchService,
     },
 };
 
@@ -21,7 +22,7 @@ pub async fn index(
     match pageable {
         Ok(Json(pageable)) => {
             let page_response = PostFetchService::new(post_repository(pool.clone()))
-                .fetch_list(pageable, None)
+                .fetch_list(pageable, Some(post::Status::Published))
                 .await?;
             Ok(SuccessResponseBuilder::new()
                 .data(page_response.items())
@@ -37,7 +38,7 @@ pub async fn show(
     Path(post_id): Path<i32>,
 ) -> Result<SuccessResponse, Error> {
     let post = PostFetchService::new(post_repository(pool.clone()))
-        .fetch(post_id)
+        .fetch(post_id, Some(post::Status::Published))
         .await?;
     Ok(SuccessResponseBuilder::new().data(post).build())
 }

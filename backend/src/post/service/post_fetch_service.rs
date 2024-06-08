@@ -15,8 +15,11 @@ impl PostFetchService {
         Self { post_repository }
     }
 
-    pub async fn fetch(&self, id: i32) -> Result<Post, Error> {
-        let post = self.post_repository.find(id).await?;
+    pub async fn fetch(&self, id: i32, status: Option<Status>) -> Result<Post, Error> {
+        let post = match status {
+            Some(status) => self.post_repository.find_by_status(id, status).await?,
+            None => self.post_repository.find(id).await?,
+        };
         Ok(post)
     }
 
