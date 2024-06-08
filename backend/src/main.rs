@@ -6,12 +6,16 @@ use std::env;
 
 use admin::controller::admin_controller;
 use axum::{
+    extract::{OriginalUri, Request},
     middleware::{self, from_extractor},
     routing::{get, post, put},
     Router,
 };
 use post::controller::admin::post_controller as admin_post_controller;
 use post::controller::post_controller;
+use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tracing::{info_span, Level};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod admin;
 mod core;
@@ -22,14 +26,28 @@ mod schema;
 async fn main() {
     dotenv::dotenv().ok();
 
+    initialize_tracing_subscriber_registry();
+
     let app = admin_routes()
         .merge(public_routes())
         .with_state(database_pool())
         .layer(middleware::from_fn(method_not_allowed_handler))
         .fallback(not_found_handler);
+    let app = add_tracing_layer(app);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+fn initialize_tracing_subscriber_registry() {
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                "rusty_blog_backend=debug,tower_http=debug,axum::rejection=trace".into()
+            }),
+        )
+        .with(tracing_subscriber::fmt::layer().json())
+        .init();
 }
 
 fn database_pool() -> deadpool_diesel::postgres::Pool {
@@ -65,4 +83,27 @@ fn public_routes() -> Router<deadpool_diesel::postgres::Pool> {
         .route("/admins/login", post(admin_controller::login))
         .route("/posts", get(post_controller::index))
         .route("/posts/:post_id", get(post_controller::show))
+}
+
+fn add_tracing_layer(router: Router) -> Router {
+    router.layer(
+        TraceLayer::new_for_http()
+            .make_span_with(make_span)
+            .on_request(DefaultOnRequest::new().level(Level::INFO))
+            .on_response(DefaultOnResponse::new().level(Level::INFO)),
+    )
+}
+
+fn make_span<B>(request: &Request<B>) -> tracing::Span {
+    let original_uri = request
+        .extensions()
+        .get::<OriginalUri>()
+        .map(|uri| uri.to_string());
+
+    info_span!(
+        "http",
+        method = ?request.method(),
+        uri = original_uri,
+        version = ?request.version(),
+    )
 }
