@@ -29,10 +29,15 @@ async fn main() {
         .expect("Could not create database pool");
 
     let admin_routes = Router::new()
-        .route("/admins/posts", post(admin_post_controller::create))
+        .route(
+            "/admins/posts",
+            get(admin_post_controller::index).post(admin_post_controller::create),
+        )
         .route(
             "/admins/posts/:post_id",
-            put(admin_post_controller::update).delete(admin_post_controller::delete),
+            put(admin_post_controller::update)
+                .get(admin_post_controller::show)
+                .delete(admin_post_controller::delete),
         )
         .route(
             "/admins/posts/:post_id/publish",

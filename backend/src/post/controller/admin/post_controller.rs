@@ -6,6 +6,7 @@ use axum::{
 use crate::{
     core::{
         error::Error,
+        pageable::Pageable,
         success_response::{SuccessResponse, SuccessResponseBuilder},
     },
     post::{
@@ -13,10 +14,29 @@ use crate::{
         repository::post_repository::PostRepository,
         service::{
             post_creation_service::PostCreationService, post_delete_service::PostDeleteService,
-            post_publish_service::PostPublishService, post_update_service::PostUpdateService,
+            post_fetch_service::PostFetchService, post_publish_service::PostPublishService,
+            post_update_service::PostUpdateService,
         },
     },
 };
+
+pub async fn index(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    pageable: Result<Json<Pageable>, JsonRejection>,
+) -> Result<SuccessResponse, Error> {
+    match pageable {
+        Ok(Json(pageable)) => {
+            let page_response = PostFetchService::new(post_repository(pool.clone()))
+                .fetch_list(pageable, None)
+                .await?;
+            Ok(SuccessResponseBuilder::new()
+                .data(page_response.items())
+                .meta(page_response.page_meta())
+                .build())
+        }
+        Err(err) => Err(Error::BadRequest(err.to_string())),
+    }
+}
 
 pub async fn create(
     State(pool): State<deadpool_diesel::postgres::Pool>,
@@ -48,6 +68,16 @@ pub async fn update(
         }
         Err(err) => Err(Error::BadRequest(err.to_string())),
     }
+}
+
+pub async fn show(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    Path(post_id): Path<i32>,
+) -> Result<SuccessResponse, Error> {
+    let post = PostFetchService::new(post_repository(pool.clone()))
+        .fetch(post_id, None)
+        .await?;
+    Ok(SuccessResponseBuilder::new().data(post).build())
 }
 
 pub async fn publish(
