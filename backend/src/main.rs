@@ -1,19 +1,11 @@
+use config::routes;
 use core::{
-    authorization::RequireAuthorization,
     error::{method_not_allowed_handler, not_found_handler},
     requesta_id_generator::RequestIdGenerator,
 };
 use std::env;
 
-use admin::controller::admin_controller;
-use axum::{
-    http::header,
-    middleware::{self, from_extractor},
-    routing::{get, post, put},
-    Router,
-};
-use post::controller::admin::post_controller as admin_post_controller;
-use post::controller::post_controller;
+use axum::{http::header, middleware, Router};
 use tower_http::{
     request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
     sensitive_headers::SetSensitiveHeadersLayer,
@@ -23,6 +15,7 @@ use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod admin;
+mod config;
 mod core;
 mod post;
 mod schema;
@@ -33,8 +26,8 @@ async fn main() {
 
     initialize_tracing_subscriber_registry();
 
-    let app = admin_routes()
-        .merge(public_routes())
+    let app = routes::admin_routes()
+        .merge(routes::public_routes())
         .with_state(database_pool())
         .layer(middleware::from_fn(method_not_allowed_handler))
         .fallback(not_found_handler);
@@ -62,32 +55,6 @@ fn database_pool() -> deadpool_diesel::postgres::Pool {
     deadpool_diesel::postgres::Pool::builder(manager)
         .build()
         .expect("Could not create database pool")
-}
-
-fn admin_routes() -> Router<deadpool_diesel::postgres::Pool> {
-    Router::new()
-        .route(
-            "/admins/posts",
-            get(admin_post_controller::index).post(admin_post_controller::create),
-        )
-        .route(
-            "/admins/posts/:post_id",
-            put(admin_post_controller::update)
-                .get(admin_post_controller::show)
-                .delete(admin_post_controller::delete),
-        )
-        .route(
-            "/admins/posts/:post_id/publish",
-            post(admin_post_controller::publish),
-        )
-        .route_layer(from_extractor::<RequireAuthorization>())
-}
-
-fn public_routes() -> Router<deadpool_diesel::postgres::Pool> {
-    Router::new()
-        .route("/admins/login", post(admin_controller::login))
-        .route("/posts", get(post_controller::index))
-        .route("/posts/:post_id", get(post_controller::show))
 }
 
 fn add_tracing_layer(router: Router) -> Router {
