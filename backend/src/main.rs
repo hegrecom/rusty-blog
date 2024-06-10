@@ -1,20 +1,25 @@
 use core::{
     authorization::RequireAuthorization,
     error::{method_not_allowed_handler, not_found_handler},
+    requesta_id_generator::RequestIdGenerator,
 };
 use std::env;
 
 use admin::controller::admin_controller;
 use axum::{
-    extract::{OriginalUri, Request},
+    http::header,
     middleware::{self, from_extractor},
     routing::{get, post, put},
     Router,
 };
 use post::controller::admin::post_controller as admin_post_controller;
 use post::controller::post_controller;
-use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tracing::{info_span, Level};
+use tower_http::{
+    request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
+    sensitive_headers::SetSensitiveHeadersLayer,
+    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+};
+use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod admin;
@@ -86,24 +91,16 @@ fn public_routes() -> Router<deadpool_diesel::postgres::Pool> {
 }
 
 fn add_tracing_layer(router: Router) -> Router {
-    router.layer(
-        TraceLayer::new_for_http()
-            .make_span_with(make_span)
-            .on_request(DefaultOnRequest::new().level(Level::INFO))
-            .on_response(DefaultOnResponse::new().level(Level::INFO)),
-    )
-}
-
-fn make_span<B>(request: &Request<B>) -> tracing::Span {
-    let original_uri = request
-        .extensions()
-        .get::<OriginalUri>()
-        .map(|uri| uri.to_string());
-
-    info_span!(
-        "http",
-        method = ?request.method(),
-        uri = original_uri,
-        version = ?request.version(),
-    )
+    router
+        .layer(PropagateRequestIdLayer::x_request_id())
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::new().include_headers(true))
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
+        )
+        .layer(SetSensitiveHeadersLayer::new(vec![header::AUTHORIZATION]))
+        .layer(SetRequestIdLayer::x_request_id(
+            RequestIdGenerator::default(),
+        ))
 }
