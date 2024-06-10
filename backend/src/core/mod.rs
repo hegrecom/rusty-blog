@@ -6,5 +6,4 @@ pub mod page_meta;
 pub mod page_response;
 pub mod pageable;
 pub mod requesta_id_generator;
-pub mod routes;
 pub mod success_response;
