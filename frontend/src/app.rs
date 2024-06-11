@@ -1,4 +1,7 @@
-use crate::error_template::{AppError, ErrorTemplate};
+use crate::{
+    error_template::{AppError, ErrorTemplate},
+    post::{post::Post, post_card::PostCard},
+};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -10,8 +13,6 @@ pub fn App() -> impl IntoView {
     console_error_panic_hook::set_once();
 
     view! {
-        // injects a stylesheet into the document <head>
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/frontend.css"/>
 
         // sets the document title
@@ -21,10 +22,7 @@ pub fn App() -> impl IntoView {
         <Router fallback=|| {
             let mut outside_errors = Errors::default();
             outside_errors.insert_with_default_key(AppError::NotFound);
-            view! {
-                <ErrorTemplate outside_errors/>
-            }
-            .into_view()
+            view! { <ErrorTemplate outside_errors/> }.into_view()
         }>
             <main>
                 <Routes>
@@ -42,8 +40,16 @@ fn HomePage() -> impl IntoView {
     let (count, set_count) = create_signal(0);
     let on_click = move |_| set_count.update(|count| *count += 1);
 
+    let post = Post {
+        title: "Hello, World!".to_string(),
+        content: "Welcome to Leptos!".to_string(),
+        created_at: chrono::Local::now(),
+        updated_at: chrono::Local::now(),
+    };
+
     view! {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
+        <PostCard post=post/>
     }
 }
