@@ -9,10 +9,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 axum = { version = "0.7", optional = true }
 console_error_panic_hook = "0.1"
-leptos = { version = "0.6", features = ["nightly"] }
+leptos = { version = "0.6" }
 leptos_axum = { version = "0.6", optional = true }
-leptos_meta = { version = "0.6", features = ["nightly"] }
-leptos_router = { version = "0.6", features = ["nightly"] }
+leptos_meta = { version = "0.6" }
+leptos_router = { version = "0.6" }
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
@@ -21,9 +21,15 @@ thiserror = "1"
 tracing = { version = "0.1", optional = true }
 http = "1"
 chrono = { version = "0.4.38", features = ["serde"] }
+leptonic = "0.5.0"
 
 [features]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
+hydrate = [
+  "leptos/hydrate",
+  "leptos_meta/hydrate",
+  "leptos_router/hydrate",
+  "leptonic/hydrate",
+]
 ssr = [
   "dep:axum",
   "dep:tokio",
@@ -34,6 +40,7 @@ ssr = [
   "leptos_meta/ssr",
   "leptos_router/ssr",
   "dep:tracing",
+  "leptonic/ssr",
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode
@@ -44,9 +51,16 @@ lto = true
 codegen-units = 1
 panic = "abort"
 
+[package.metadata.leptonic]
+# REQUIRED: Leptonic's build-script will copy the Leptonic themes to this directory.
+style-dir = "style"
+
+# REQUIRED: Leptonic's build-script will copy static JS dependencies to this directory.
+js-dir = "public/js"
+
 [package.metadata.leptos]
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
-output-name = "frontend"
+output-name = "rusty-blog-frontend"
 
 # The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.
 site-root = "target/site"
