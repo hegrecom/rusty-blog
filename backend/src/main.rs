@@ -1,5 +1,6 @@
 use config::{database, routes};
 use core::error::{method_not_allowed_handler, not_found_handler};
+use std::env;
 
 use axum::middleware;
 
@@ -22,6 +23,11 @@ async fn main() {
         .fallback(not_found_handler);
     let app = config::tracing::add_tracing_layer(app);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!(
+        "0.0.0.0:{}",
+        env::var("PORT").unwrap_or("3000".to_string())
+    ))
+    .await
+    .unwrap();
     axum::serve(listener, app).await.unwrap();
 }
