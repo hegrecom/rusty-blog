@@ -9,10 +9,8 @@ where
     Tz: TimeZone,
 {
     view! {
-        <div>
-            <h2>{post.title}</h2>
-            <p>{post.content}</p>
-            <p>Created at: {post.created_at.to_rfc2822()}</p>
-        </div>
+        <h2>{post.title}</h2>
+        <p>{post.content}</p>
+        <p>Created at: {post.created_at.to_rfc2822()}</p>
     }
 }

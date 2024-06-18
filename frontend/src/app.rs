@@ -1,6 +1,6 @@
 use crate::{
     error_template::{AppError, ErrorTemplate},
-    post::{post::Post, post_card::PostCard},
+    home_page::home_page::HomePage,
 };
 use leptonic::prelude::*;
 use leptos::*;
@@ -17,7 +17,7 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/rusty-blog-frontend.css"/>
 
         // sets the document title
-        <Title text="Welcome to Leptos"/>
+        <Title text="Teekey.dev Blog"/>
 
         // content for this welcome page
         <Root default_theme=LeptonicTheme::Light>
@@ -33,29 +33,5 @@ pub fn App() -> impl IntoView {
                 </main>
             </Router>
         </Root>
-    }
-}
-
-/// Renders the home page of your application.
-#[component]
-fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let (count, set_count) = create_signal(0);
-
-    let post = Post {
-        title: "Hello, World!".to_string(),
-        content: "Welcome to Leptos!".to_string(),
-        created_at: chrono::Local::now(),
-        updated_at: chrono::Local::now(),
-    };
-
-    view! {
-        <Box style="display: flex; flex-direction: column; align-items: center; padding: 1em; min-height: 100%; min-width: 100%">
-            <H2>"Welcome to Leptonic"</H2>
-
-            <span style="margin-top: 3em;">"Count: " {move || count.get()}</span>
-            <Button on_click=move |_| set_count.update(|c| *c += 1)>"Increase"</Button>
-            <PostCard post=post/>
-        </Box>
     }
 }
