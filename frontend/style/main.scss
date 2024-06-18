@@ -18,5 +18,12 @@ body {
 @import "./leptonic/leptonic-themes";
 
 [data-theme="light"] {
+  // Box
   --box-background-color: #ffffff;
+
+  // App Bar
+  --app-bar-background-color: #ffffff;
+  --app-bar-height: 60px;
+  --app-bar-box-shadow: none;
+  --app-bar-border-bottom: 1px solid #e0e0e0;
 }
