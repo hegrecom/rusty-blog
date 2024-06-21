@@ -15,6 +15,10 @@ pub fn App() -> impl IntoView {
     console_error_panic_hook::set_once();
 
     view! {
+        <Meta name="charset" content="UTF-8"/>
+        <Meta name="description" content="Teekey's Blog"/>
+        <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
         <Stylesheet id="leptos" href="/pkg/rusty-blog-frontend.css"/>
 
         // sets the document title

@@ -1,5 +1,5 @@
 use leptonic::prelude::*;
-use leptos::{component, view, IntoView};
+use leptos::*;
 
 use crate::post::{post::Post, post_card::PostCard};
 
@@ -13,8 +13,28 @@ pub fn HomePage() -> impl IntoView {
     };
 
     view! {
-        <Box style="display: flex; flex-direction: column; align-items: center; padding: 1em; min-height: 100%; min-width: 100%; height: 100%;">
-            <PostCard post=post/>
-        </Box>
+        <Grid spacing=Size::Px(
+            0,
+        )>
+
+            {(0..10)
+                .map(|_| {
+                    let cloned_post = post.clone();
+                    view! {
+                        <Row>
+                            <Col md=3 sm=3 xs=3>
+                                <div></div>
+                            </Col>
+                            <Col md=6 sm=6 xs=6>
+                                <PostCard post=cloned_post/>
+                            </Col>
+                            <Col md=3 sm=3 xs=3>
+                                <div></div>
+                            </Col>
+                        </Row>
+                    }
+                })
+                .collect_view()}
+        </Grid>
     }
 }
