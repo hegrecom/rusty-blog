@@ -2,6 +2,10 @@
 
 :root {
   --default-background-color: #f8f8f8;
+
+  // Text
+  --primary-text-color: #1d1d1d;
+  --secondary-text-color: #6b6b6b;
 }
 
 [data-theme="light"] {
@@ -15,6 +19,10 @@
   --app-bar-height: 60px;
   --app-bar-box-shadow: none;
   --app-bar-border-bottom: 1px solid #e0e0e0;
+
+  // Text
+  --primary-text-color: #1d1d1d;
+  --secondary-text-color: #6b6b6b;
 }
 
 * {

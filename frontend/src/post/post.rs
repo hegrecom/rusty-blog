@@ -1,9 +1,9 @@
-use chrono::{DateTime, TimeZone};
+use chrono::{DateTime, Local};
 
 #[derive(Clone)]
-pub struct Post<Tz: TimeZone> {
+pub struct Post {
     pub title: String,
     pub content: String,
-    pub created_at: DateTime<Tz>,
-    pub updated_at: DateTime<Tz>,
+    pub created_at: DateTime<Local>,
+    pub updated_at: DateTime<Local>,
 }
