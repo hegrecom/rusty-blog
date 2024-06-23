@@ -1,7 +1,4 @@
-use axum::{
-    extract::{rejection::JsonRejection, Path, State},
-    Json,
-};
+use axum::extract::{rejection::QueryRejection, Path, Query, State};
 
 use crate::{
     core::{
@@ -17,10 +14,10 @@ use crate::{
 
 pub async fn index(
     State(pool): State<deadpool_diesel::postgres::Pool>,
-    pageable: Result<Json<Pageable>, JsonRejection>,
+    pageable: Result<Query<Pageable>, QueryRejection>,
 ) -> Result<SuccessResponse, Error> {
     match pageable {
-        Ok(Json(pageable)) => {
+        Ok(Query(pageable)) => {
             let page_response = PostFetchService::new(post_repository(pool.clone()))
                 .fetch_list(pageable, Some(post::Status::Published))
                 .await?;
