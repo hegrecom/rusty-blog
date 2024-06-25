@@ -1,8 +1,5 @@
 use std::env;
 
-use chrono::TimeZone;
-use leptos::logging;
-
 use super::{error::BackendClientError, response::{PostsResponse, Response}};
 
 pub struct BackendClient {
