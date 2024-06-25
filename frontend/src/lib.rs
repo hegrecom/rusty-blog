@@ -1,4 +1,5 @@
 pub mod app;
+pub mod backend_client;
 pub mod error_template;
 #[cfg(feature = "ssr")]
 pub mod fileserv;
