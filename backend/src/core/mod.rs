@@ -1,4 +1,5 @@
 pub mod authorization;
+pub mod cors_layer;
 pub mod error;
 pub mod error_response;
 pub mod into_json;

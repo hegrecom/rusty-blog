@@ -1,5 +1,8 @@
 use config::{database, routes};
-use core::error::{method_not_allowed_handler, not_found_handler};
+use core::{
+    cors_layer::cors_layer,
+    error::{method_not_allowed_handler, not_found_handler},
+};
 use std::env;
 
 use axum::middleware;
@@ -20,6 +23,7 @@ async fn main() {
         .merge(routes::public_routes())
         .with_state(database::database_pool())
         .layer(middleware::from_fn(method_not_allowed_handler))
+        .layer(cors_layer())
         .fallback(not_found_handler);
     let app = config::tracing::add_tracing_layer(app);
 
