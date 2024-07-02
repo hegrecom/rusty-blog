@@ -4,7 +4,7 @@ use chrono::{DateTime, Local, NaiveDateTime};
 pub struct Post {
     pub title: String,
     pub content: String,
-    #[serde(deserialize_with = "deserialize_from_str")]
+    #[serde(deserialize_with = "deserialize_from_str", serialize_with = "serialize_to_str")]
     pub created_at: DateTime<Local>,
 }
 
@@ -17,4 +17,12 @@ where
         .map_err(serde::de::Error::custom)?;
     let utc_datetime = naive_datetime.and_utc();
     Ok(DateTime::from(utc_datetime))
+}
+
+fn serialize_to_str<S>(date: &DateTime<Local>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    let s = date.format("%Y-%m-%dT%H:%M:%S%.f").to_string();
+    serializer.serialize_str(&s)
 }

@@ -1,5 +1,7 @@
 use std::env;
 
+use crate::config::config::AppConfig;
+
 use super::{error::BackendClientError, response::{PostsResponse, Response}};
 
 pub struct BackendClient {
@@ -8,9 +10,9 @@ pub struct BackendClient {
 }
 
 impl BackendClient {
-    pub fn client() -> Self {
+    pub fn default() -> Self {
         BackendClient {
-            base_url: env::var("BACKEND_HOST").expect("BACKEND_HOST must be set"),
+            base_url: AppConfig::default().backend.host,
             client: reqwest::ClientBuilder::new().build().unwrap(),
         }
     }
