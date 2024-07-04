@@ -63,6 +63,8 @@ pub fn HomePage() -> impl IntoView {
                 }}
 
             </Transition>
+            {move || { if posts_resource.loading().get() { "loading..." } else { "" } }}
+
         </Grid>
     }
 }
