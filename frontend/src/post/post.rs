@@ -2,6 +2,7 @@ use chrono::{DateTime, Local, NaiveDateTime};
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Post {
+    pub id: i32,
     pub title: String,
     pub content: String,
     #[serde(deserialize_with = "deserialize_from_str", serialize_with = "serialize_to_str")]

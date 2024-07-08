@@ -30,6 +30,12 @@ pub struct PageMeta {
     total_pages: i32,
 }
 
+impl PageMeta {
+    pub fn total_pages(&self) -> i32 {
+        self.total_pages
+    }
+}
+
 impl TryFrom<Response> for PostsResponse {
     type Error = serde_json::Error;
 
